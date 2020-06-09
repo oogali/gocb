@@ -56,7 +56,16 @@ func (t DefaultTranscoder) Decode(bytes []byte, flags uint32, out interface{}) e
 	} else if valueType == gocbcore.JsonType {
 		err := json.Unmarshal(bytes, &out)
 		if err != nil {
-			return err
+			switch typedOut := out.(type) {
+			case *[]byte:
+				*typedOut = bytes
+				return nil
+			case *interface{}:
+				*typedOut = bytes
+				return nil
+			default:
+				return err
+			}
 		}
 		return nil
 	}
